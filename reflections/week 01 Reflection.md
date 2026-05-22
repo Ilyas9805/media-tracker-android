@@ -1,7 +1,7 @@
-# Week {{N}} Reflection
+# Week 01 Reflection
 
-**Name:**
-**Date:**
+**Name:** Ilyas Ibrahim
+**Date:** 05/21/26
 
 ---
 

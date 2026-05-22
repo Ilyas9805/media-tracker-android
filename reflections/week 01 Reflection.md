@@ -11,8 +11,7 @@
      click "commits", and copy the URL after filtering by your name or branch. -->
 
 **Link:**
-
----
+https://github.com/benjamincassidymetro/media-tracker-android/pull/4/commits---
 
 ## Code Review
 

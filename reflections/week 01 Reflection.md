@@ -11,8 +11,7 @@
      click "commits", and copy the URL after filtering by your name or branch. -->
 
 **Link:**
-https://github.com/benjamincassidymetro/media-tracker-android/pull/4/commits---
-
+https://github.com/Ilyas9805/media-tracker-android/pull/1
 ## Code Review
 
 <!-- Every week you leave a review on a pod mate's pull request. Fill in both parts below.
@@ -21,11 +20,16 @@ https://github.com/benjamincassidymetro/media-tracker-android/pull/4/commits---
 
 **Reviewed:** *(pod mate's name)*
 **Link to my review:**
+https://github.com/NChyrklund/media-tracker-android/pull/1
+
 
 ### What I Looked At
 
 <!-- Walk through the code you reviewed. What was the PR trying to do? Which files or
      functions did you focus on? -->
+
+I focused on both changes. In MainActivity.kt, the author swapped out MaterialTheme {} for MediaTrackerTheme()
+
 
 ### What I Noticed
 
@@ -33,11 +37,14 @@ https://github.com/benjamincassidymetro/media-tracker-android/pull/4/commits---
      done well that you want to call out? "I looked at the ViewModel and everything seemed fine"
      is not specific enough. Name the thing you noticed and explain why it matters. -->
 
+I noticed that the color has changed from more darker purple to lighter purple.
+
 ### Comments I Left
 
 <!-- Briefly summarize the comments you left on the PR. If you left a positive comment,
      say what it was. If you left a suggestion, say what you suggested and why. -->
 
+I left a comment saying that it was nice how my partner followed the teacher's instruction, I know we did not do much coding ourselves
 ---
 
 ## One Thing I Understood More Deeply
@@ -45,14 +52,14 @@ https://github.com/benjamincassidymetro/media-tracker-android/pull/4/commits---
 <!-- Be specific. Don't write "I learned about ViewModels." Write what specifically clicked —
      what was confusing before, what made it make sense, and how you'd explain it to someone else.
      There are no wrong answers here. -->
-
+I understood how to navigate throught the Andriod Studio, I know it is not code related but it saved me a lot of time.
 ---
 
 ## One Thing I'm Still Confused About
 
 <!-- Be honest. This is the most useful part of the reflection for me — it tells me where to
      spend more time in class. You will not lose points for being confused. -->
-
+I'm not totally sure what the practical difference is between wrapping content in MaterialTheme {} versus MediaTrackerTheme {}.
 ---
 
 ## Anything Else *(optional)*

@@ -88,5 +88,7 @@
     <string name="media_unknown_author">Unknown Author</string>
     <string name="media_unknown_director">Unknown Director</string>
     <string name="media_unknown_creator">Unknown Creator</string>
+    <string name="filter_albums" />
+    <string name="filter_comics" />
 
 </resources>

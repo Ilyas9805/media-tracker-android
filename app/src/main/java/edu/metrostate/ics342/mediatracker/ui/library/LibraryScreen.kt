@@ -74,7 +74,7 @@ fun LibraryScreen(
                 SegmentedButton(
                     shape    = SegmentedButtonDefaults.itemShape(
                         index = index, count = LibraryStatus.values().size),
-                    selected = { selectedStatus == status },
+                    selected =  selectedStatus == status,
                     onClick  = { viewModel.updateFilter(status) },
                     label    = { Text(stringResource(status.labelRes)) }
                 )

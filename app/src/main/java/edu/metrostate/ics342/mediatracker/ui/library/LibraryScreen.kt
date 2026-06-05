@@ -1,5 +1,6 @@
 package edu.metrostate.ics342.mediatracker.ui.library
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -11,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,16 +36,16 @@ fun LibraryScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val selectedStatus by viewModel.filterState.collectAsState()
 
-    var selectedType   by remember() { mutableStateOf("all") }
+    var selectedType by remember { mutableStateOf("all") }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(title = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.library_title)) })
-`
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                .horizontalScroll(state = rememberScrollState()),
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             listOf(
@@ -53,8 +53,8 @@ fun LibraryScreen(
                 "book"  to edu.metrostate.ics342.mediatracker.R.string.filter_books,
                 "movie" to edu.metrostate.ics342.mediatracker.R.string.filter_movies,
                 "show"  to edu.metrostate.ics342.mediatracker.R.string.filter_shows,
-                "comics"  to edu.metrostate.ics342.mediatracker.R.string.filter_comics,
-                "albums"  to edu.metrostate.ics342.mediatracker.R.string.filter_albums,
+                "comics" to edu.metrostate.ics342.mediatracker.R.string.filter_comics,
+                "albums" to edu.metrostate.ics342.mediatracker.R.string.filter_albums,
             )
                 .forEach { (key, labelRes) ->
                     FilterChip(
@@ -74,7 +74,7 @@ fun LibraryScreen(
                 SegmentedButton(
                     shape    = SegmentedButtonDefaults.itemShape(
                         index = index, count = LibraryStatus.values().size),
-                    selected =  selectedStatus == status,
+                    selected = selectedStatus == status,
                     onClick  = { viewModel.updateFilter(status) },
                     label    = { Text(stringResource(status.labelRes)) }
                 )
@@ -96,9 +96,7 @@ fun LibraryScreen(
 
         if (filteredItems.isEmpty()) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
+                modifier = Modifier.fillMaxSize().padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -167,9 +165,7 @@ private fun LibraryItemCard(
     }
 
     Card(
-        modifier  = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+        modifier  = Modifier.fillMaxWidth().clickable { onClick() },
         shape     = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {

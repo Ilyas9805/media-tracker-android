@@ -5,42 +5,54 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.metrostate.ics342.mediatracker.R
-import edu.metrostate.ics342.mediatracker.data.UserRepository
 import edu.metrostate.ics342.mediatracker.theme.OnPrimaryContainer
+import edu.metrostate.ics342.mediatracker.theme.Primary
 import edu.metrostate.ics342.mediatracker.theme.PrimaryContainer
 
 @Composable
 fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit,
-    viewModel: RegisterViewModel = viewModel(
-        factory = RegisterViewModelFactory(UserRepository())
-    )
+    onNavigateToLogin: () -> Unit
 ) {
-    val displayName     by viewModel.displayName.collectAsState()
-    val username        by viewModel.username.collectAsState()
-    val email           by viewModel.email.collectAsState()
-    val password        by viewModel.password.collectAsState()
-    val confirmPassword by viewModel.confirmPassword.collectAsState()
-    val isSuccess       by viewModel.isSuccess.collectAsState()
+    var displayName     by remember { mutableStateOf("") }
+    var username        by remember { mutableStateOf("") }
+    var email           by remember { mutableStateOf("") }
+    var password        by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var errorMessage    by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(isSuccess) {
-        if (isSuccess) onRegisterSuccess()
+    val focusManager = LocalFocusManager.current
+
+    fun attemptRegister() {
+        focusManager.clearFocus()
+        when {
+            displayName.isBlank() || email.isBlank() || username.isBlank() ||
+                    password.isBlank()    || confirmPassword.isBlank() -> {
+                errorMessage = "Please fill in all fields."
+            }
+            password != confirmPassword -> {
+                errorMessage = "Passwords do not match."
+            }
+            else -> onRegisterSuccess()
+        }
     }
 
     Column(
@@ -60,16 +72,17 @@ fun RegisterScreen(
                 .size(64.dp)
                 .background(PrimaryContainer, RoundedCornerShape(12.dp))
                 .padding(12.dp),
-            colorFilter = ColorFilter.tint(OnPrimaryContainer)
+            colorFilter = ColorFilter.tint(Primary)
         )
 
         Spacer(Modifier.height(16.dp))
 
         // ── Heading ───────────────────────────────────────────────────────────
         Text(
-            text  = "Create Account",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary
+            text       = "Create Account",
+            style      = MaterialTheme.typography.headlineMedium,
+            color      = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(Modifier.height(4.dp))
@@ -85,34 +98,43 @@ fun RegisterScreen(
         // ── Fields ────────────────────────────────────────────────────────────
         OutlinedTextField(
             value           = displayName,
-            onValueChange   = viewModel::setDisplayName,
+            onValueChange   = { displayName = it; errorMessage = null },
             label           = { Text("Display Name") },
             singleLine      = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            modifier        = Modifier.fillMaxWidth()
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            ),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(12.dp))
 
         OutlinedTextField(
             value           = username,
-            onValueChange   = viewModel::setUsername,
+            onValueChange   = { username = it; errorMessage = null },
             label           = { Text("Username") },
             singleLine      = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            modifier        = Modifier.fillMaxWidth()
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            ),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(12.dp))
 
         OutlinedTextField(
             value           = email,
-            onValueChange   = viewModel::setEmail,
+            onValueChange   = { email = it; errorMessage = null },
             label           = { Text("Email") },
             singleLine      = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction    = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -121,13 +143,16 @@ fun RegisterScreen(
 
         OutlinedTextField(
             value                = password,
-            onValueChange        = viewModel::setPassword,
+            onValueChange        = { password = it; errorMessage = null },
             label                = { Text("Password") },
             singleLine           = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction    = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -136,7 +161,7 @@ fun RegisterScreen(
 
         OutlinedTextField(
             value                = confirmPassword,
-            onValueChange        = viewModel::setConfirmPassword,
+            onValueChange        = { confirmPassword = it; errorMessage = null },
             label                = { Text("Confirm Password") },
             singleLine           = true,
             visualTransformation = PasswordVisualTransformation(),
@@ -144,14 +169,26 @@ fun RegisterScreen(
                 keyboardType = KeyboardType.Password,
                 imeAction    = ImeAction.Done
             ),
+            keyboardActions = KeyboardActions(
+                onDone = { attemptRegister() }
+            ),
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (errorMessage != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text  = errorMessage!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
 
         Spacer(Modifier.height(24.dp))
 
         // ── Sign Up button ────────────────────────────────────────────────────
         Button(
-            onClick  = { viewModel.onSignUpClicked() },
+            onClick  = { attemptRegister() },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
@@ -162,10 +199,8 @@ fun RegisterScreen(
         Spacer(Modifier.height(16.dp))
 
         // ── Already have an account? ──────────────────────────────────────────
-        Text("Already have an account?")
-
         TextButton(onClick = onNavigateToLogin) {
-            Text("Log In")
+            Text("Already have an account? Log In")
         }
     }
 }
@@ -175,4 +210,3 @@ fun RegisterScreen(
 fun RegisterScreenPreview() {
     RegisterScreen({}, {})
 }
-

@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.metrostate.ics342.mediatracker.R
 import edu.metrostate.ics342.mediatracker.theme.OnPrimaryContainer
+import edu.metrostate.ics342.mediatracker.theme.Primary
 import edu.metrostate.ics342.mediatracker.theme.PrimaryContainer
 
 @Composable
@@ -59,15 +61,15 @@ fun LoginScreen(
     ){
 
     // ── Icon ──────────────────────────────────────────────────────────────
-    Image(
-        painter            = painterResource(R.drawable.smart_display),
-        contentDescription = "Application Icon",
-        modifier = Modifier
-            .size(64.dp)
-            .background(PrimaryContainer, RoundedCornerShape(12.dp))
-            .padding(12.dp),
-        colorFilter = ColorFilter.tint(OnPrimaryContainer)
-    )
+        Image(
+            painter            = painterResource(R.drawable.smart_display),
+            contentDescription = "Application Icon",
+            modifier = Modifier
+                .size(64.dp)
+                .background(PrimaryContainer, RoundedCornerShape(12.dp))
+                .padding(12.dp),
+            colorFilter = ColorFilter.tint(Primary)
+        )
 
     Spacer(Modifier.height(16.dp))
 
@@ -78,8 +80,13 @@ fun LoginScreen(
         verticalArrangement   = Arrangement.Center,
         horizontalAlignment   = Alignment.CenterHorizontally
     ) {
-        Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.app_name), style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            text       = stringResource(edu.metrostate.ics342.mediatracker.R.string.app_name),
+            style      = MaterialTheme.typography.headlineMedium,
+            color      = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold
+        )
+
 
         Spacer(Modifier.height(8.dp))
 

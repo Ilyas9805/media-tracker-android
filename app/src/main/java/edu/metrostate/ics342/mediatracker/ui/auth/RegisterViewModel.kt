@@ -30,6 +30,9 @@ class RegisterViewModel(
     private val _isSuccess       = MutableStateFlow(false)
     val isSuccess                = _isSuccess.asStateFlow()
 
+    private val _errorMessage    = MutableStateFlow<String?>(null)
+    val errorMessage             = _errorMessage.asStateFlow()
+
     fun setDisplayName(value: String)     { _displayName.value     = value }
     fun setUsername(value: String)        { _username.value        = value }
     fun setEmail(value: String)           { _email.value           = value }
@@ -37,6 +40,20 @@ class RegisterViewModel(
     fun setConfirmPassword(value: String) { _confirmPassword.value = value }
 
     fun onSignUpClicked() {
+        // Basic validation before hitting the API
+        when {
+            _displayName.value.isBlank() || _username.value.isBlank() ||
+                    _email.value.isBlank()       || _password.value.isBlank() ||
+                    _confirmPassword.value.isBlank() -> {
+                _errorMessage.value = "Please fill in all fields."
+                return
+            }
+            _password.value != _confirmPassword.value -> {
+                _errorMessage.value = "Passwords do not match."
+                return
+            }
+        }
+
         viewModelScope.launch {
             try {
                 userRepository.createAccount(
@@ -47,7 +64,7 @@ class RegisterViewModel(
                 )
                 _isSuccess.value = true
             } catch (e: Exception) {
-                // API returned an error — don't crash, just log it for now
+                _errorMessage.value = "Something went wrong. Please try again."
                 e.printStackTrace()
             }
         }

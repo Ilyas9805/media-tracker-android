@@ -1,21 +1,33 @@
 package edu.metrostate.ics342.mediatracker.ui.auth
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.metrostate.ics342.mediatracker.R
+import edu.metrostate.ics342.mediatracker.theme.OnPrimaryContainer
+import edu.metrostate.ics342.mediatracker.theme.Primary
+import edu.metrostate.ics342.mediatracker.theme.PrimaryContainer
 
 @Composable
 fun LoginScreen(
@@ -42,12 +54,39 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ){
+
+    // ── Icon ──────────────────────────────────────────────────────────────
+        Image(
+            painter            = painterResource(R.drawable.smart_display),
+            contentDescription = "Application Icon",
+            modifier = Modifier
+                .size(64.dp)
+                .background(PrimaryContainer, RoundedCornerShape(12.dp))
+                .padding(12.dp),
+            colorFilter = ColorFilter.tint(Primary)
+        )
+
+    Spacer(Modifier.height(16.dp))
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
             .padding(horizontal = 24.dp),
         verticalArrangement   = Arrangement.Center,
         horizontalAlignment   = Alignment.CenterHorizontally
     ) {
-        Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.app_name), style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary)
+        Text(
+            text       = stringResource(edu.metrostate.ics342.mediatracker.R.string.app_name),
+            style      = MaterialTheme.typography.headlineMedium,
+            color      = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold
+        )
+
 
         Spacer(Modifier.height(8.dp))
 
@@ -55,6 +94,7 @@ fun LoginScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center)
+            
 
         Spacer(Modifier.height(40.dp))
 
@@ -108,7 +148,7 @@ fun LoginScreen(
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             } else {
                 Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.sign_in_button))
@@ -122,3 +162,4 @@ fun LoginScreen(
         }
     }
 }
+    }

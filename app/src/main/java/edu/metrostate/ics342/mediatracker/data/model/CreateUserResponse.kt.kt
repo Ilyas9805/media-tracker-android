@@ -1,0 +1,20 @@
+package edu.metrostate.ics342.mediatracker.data.model
+
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class CreateUserResponse(
+    val id: String,
+    val email: String,
+    val username: String,
+    val displayName: String,
+    val bio: String? = null,
+    val avatarUrl: String? = null,
+    val followerCount: Int = 0,
+    val followingCount: Int = 0,
+    val trackedCount: Int = 0,
+    val isFollowing: Boolean = false,
+    val createdAt: String
+)

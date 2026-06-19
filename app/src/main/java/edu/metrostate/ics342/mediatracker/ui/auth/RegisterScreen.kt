@@ -22,37 +22,34 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.metrostate.ics342.mediatracker.data.network.DefaultUserRepository
 import edu.metrostate.ics342.mediatracker.R
-import edu.metrostate.ics342.mediatracker.theme.OnPrimaryContainer
+import edu.metrostate.ics342.mediatracker.data.UserRepository
 import edu.metrostate.ics342.mediatracker.theme.Primary
 import edu.metrostate.ics342.mediatracker.theme.PrimaryContainer
 
 @Composable
 fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    viewModel: RegisterViewModel = viewModel(
+        factory = RegisterViewModelFactory(DefaultUserRepository())
+
+    )
 ) {
-    var displayName     by remember { mutableStateOf("") }
-    var username        by remember { mutableStateOf("") }
-    var email           by remember { mutableStateOf("") }
-    var password        by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var errorMessage    by remember { mutableStateOf<String?>(null) }
+    val displayName     by viewModel.displayName.collectAsState()
+    val username        by viewModel.username.collectAsState()
+    val email           by viewModel.email.collectAsState()
+    val password        by viewModel.password.collectAsState()
+    val confirmPassword by viewModel.confirmPassword.collectAsState()
+    val isSuccess       by viewModel.isSuccess.collectAsState()
+    val errorMessage    by viewModel.errorMessage.collectAsState()
 
     val focusManager = LocalFocusManager.current
 
-    fun attemptRegister() {
-        focusManager.clearFocus()
-        when {
-            displayName.isBlank() || email.isBlank() || username.isBlank() ||
-                    password.isBlank()    || confirmPassword.isBlank() -> {
-                errorMessage = "Please fill in all fields."
-            }
-            password != confirmPassword -> {
-                errorMessage = "Passwords do not match."
-            }
-            else -> onRegisterSuccess()
-        }
+    LaunchedEffect(isSuccess) {
+        if (isSuccess) onRegisterSuccess()
     }
 
     Column(
@@ -98,7 +95,7 @@ fun RegisterScreen(
         // ── Fields ────────────────────────────────────────────────────────────
         OutlinedTextField(
             value           = displayName,
-            onValueChange   = { displayName = it; errorMessage = null },
+            onValueChange   = viewModel::setDisplayName,
             label           = { Text("Display Name") },
             singleLine      = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -112,7 +109,7 @@ fun RegisterScreen(
 
         OutlinedTextField(
             value           = username,
-            onValueChange   = { username = it; errorMessage = null },
+            onValueChange   = viewModel::setUsername,
             label           = { Text("Username") },
             singleLine      = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -126,7 +123,7 @@ fun RegisterScreen(
 
         OutlinedTextField(
             value           = email,
-            onValueChange   = { email = it; errorMessage = null },
+            onValueChange   = viewModel::setEmail,
             label           = { Text("Email") },
             singleLine      = true,
             keyboardOptions = KeyboardOptions(
@@ -143,7 +140,7 @@ fun RegisterScreen(
 
         OutlinedTextField(
             value                = password,
-            onValueChange        = { password = it; errorMessage = null },
+            onValueChange        = viewModel::setPassword,
             label                = { Text("Password") },
             singleLine           = true,
             visualTransformation = PasswordVisualTransformation(),
@@ -161,7 +158,7 @@ fun RegisterScreen(
 
         OutlinedTextField(
             value                = confirmPassword,
-            onValueChange        = { confirmPassword = it; errorMessage = null },
+            onValueChange        = viewModel::setConfirmPassword,
             label                = { Text("Confirm Password") },
             singleLine           = true,
             visualTransformation = PasswordVisualTransformation(),
@@ -170,7 +167,7 @@ fun RegisterScreen(
                 imeAction    = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
-                onDone = { attemptRegister() }
+                onDone = { focusManager.clearFocus(); viewModel.onSignUpClicked() }
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -188,7 +185,7 @@ fun RegisterScreen(
 
         // ── Sign Up button ────────────────────────────────────────────────────
         Button(
-            onClick  = { attemptRegister() },
+            onClick  = { focusManager.clearFocus(); viewModel.onSignUpClicked() },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)

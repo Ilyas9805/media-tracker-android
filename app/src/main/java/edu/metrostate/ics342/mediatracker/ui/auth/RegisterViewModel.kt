@@ -3,6 +3,7 @@ package edu.metrostate.ics342.mediatracker.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import edu.metrostate.ics342.mediatracker.data.RegisterResult
 import edu.metrostate.ics342.mediatracker.data.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,7 +41,6 @@ class RegisterViewModel(
     fun setConfirmPassword(value: String) { _confirmPassword.value = value }
 
     fun onSignUpClicked() {
-        // Basic validation before hitting the API
         when {
             _displayName.value.isBlank() || _username.value.isBlank() ||
                     _email.value.isBlank()       || _password.value.isBlank() ||
@@ -55,17 +55,18 @@ class RegisterViewModel(
         }
 
         viewModelScope.launch {
-            try {
-                userRepository.createAccount(
-                    displayName = _displayName.value,
-                    username    = _username.value,
-                    email       = _email.value,
-                    password    = _password.value
-                )
-                _isSuccess.value = true
-            } catch (e: Exception) {
-                _errorMessage.value = "Something went wrong. Please try again."
-                e.printStackTrace()
+            _errorMessage.value = null
+            val result = userRepository.register(
+                email       = _email.value,
+                password    = _password.value,
+                username    = _username.value,
+                displayName = _displayName.value
+            )
+            when (result) {
+                is RegisterResult.Success      -> _isSuccess.value = true
+                is RegisterResult.Conflict     -> _errorMessage.value = "That email or username is already taken."
+                is RegisterResult.NetworkError -> _errorMessage.value = "Network error. Please check your connection."
+                is RegisterResult.UnknownError -> _errorMessage.value = "Something went wrong. Please try again."
             }
         }
     }

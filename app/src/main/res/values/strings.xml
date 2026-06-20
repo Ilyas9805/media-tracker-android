@@ -14,6 +14,7 @@
     <string name="login_prompt">Already have an account? Log In</string>
     <string name="register_title">Create Account</string>
     <string name="register_tagline">Join the community</string>
+    <string name="register_success">Account created! Please sign in.</string>
 
     <!-- Navigation -->
     <string name="nav_feed">Feed</string>
@@ -94,6 +95,7 @@
     <string name="error_empty_fields">Please fill in all fields.</string>
     <string name="error_passwords_mismatch">Passwords do not match.</string>
     <string name="error_email_or_username_taken">That email or username is already taken.</string>
+    <string name="error_invalid_credentials">Invalid email or password.</string>
     <string name="error_network">Network error. Check your connection and try again.</string>
     <string name="error_generic">Something went wrong. Please try again.</string>
 

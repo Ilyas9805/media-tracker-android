@@ -22,6 +22,7 @@ import edu.metrostate.ics342.mediatracker.ui.profile.MyProfileScreen
 import edu.metrostate.ics342.mediatracker.ui.profile.UserProfileScreen
 import edu.metrostate.ics342.mediatracker.ui.review.WriteReviewScreen
 import edu.metrostate.ics342.mediatracker.ui.search.SearchScreen
+import edu.metrostate.ics342.mediatracker.ui.search.SearchResultsScreen
 import edu.metrostate.ics342.mediatracker.ui.settings.SettingsScreen
 
 private val bottomNavRoutes = setOf(
@@ -88,7 +89,24 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
 
             composable(Routes.SEARCH) {
                 SearchScreen(
-                    onMediaClick = { mediaId -> navController.navigate("media_detail/$mediaId") }
+                    onSearch = { query ->
+                        navController.navigate("search_results?query=$query")
+                    }
+                )
+            }
+
+            composable(
+                route     = Routes.SEARCH_RESULTS,
+                arguments = listOf(navArgument("query") {
+                    type         = NavType.StringType
+                    defaultValue = ""
+                })
+            ) { backStackEntry ->
+                val query = backStackEntry.arguments?.getString("query") ?: ""
+                SearchResultsScreen(
+                    initialQuery   = query,
+                    onMediaClick   = { mediaId -> navController.navigate("media_detail/$mediaId") },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

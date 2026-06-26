@@ -1,28 +1,51 @@
 package edu.metrostate.ics342.mediatracker.ui.search
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 
-// ── STUB — Students build this in Week 5 ─────────────────────────────────────
-//
-// Week 5 task: Build the Search screen.
-//   1. Add a search bar (SearchBar or OutlinedTextField) at the top.
-//   2. Add FilterChips for All / Books / Movies / Shows in a horizontally scrollable Row.
-//   3. Display results in a LazyColumn (you'll learn why Column won't work here).
-//   4. Wire to GET /media?query=...&type=...
-//   5. Handle loading, empty, and error states.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    onMediaClick: (Int) -> Unit
+    onSearch: (String) -> Unit
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.search_not_implemented))
+    var query by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value         = query,
+            onValueChange = { query = it },
+            placeholder   = { Text("Search") },
+            leadingIcon   = {
+                Icon(
+                    Icons.Filled.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            singleLine      = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = { if (query.isNotBlank()) onSearch(query) }
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                "Search for books, movies, and shows",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

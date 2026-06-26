@@ -22,6 +22,7 @@ import edu.metrostate.ics342.mediatracker.ui.profile.MyProfileScreen
 import edu.metrostate.ics342.mediatracker.ui.profile.UserProfileScreen
 import edu.metrostate.ics342.mediatracker.ui.review.WriteReviewScreen
 import edu.metrostate.ics342.mediatracker.ui.search.SearchScreen
+import edu.metrostate.ics342.mediatracker.ui.search.SearchResultsScreen
 import edu.metrostate.ics342.mediatracker.ui.settings.SettingsScreen
 
 private val bottomNavRoutes = setOf(
@@ -49,9 +50,17 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
             startDestination = Routes.LOGIN,
             modifier         = Modifier.padding(innerPadding)
         ) {
-            composable(Routes.LOGIN) {
+            composable(
+                route     = "${Routes.LOGIN}?registered={registered}",
+                arguments = listOf(navArgument("registered") {
+                    type         = NavType.BoolType
+                    defaultValue = false
+                })
+            ) { backStackEntry ->
+                val showRegistrationSuccess = backStackEntry.arguments?.getBoolean("registered") ?: false
                 LoginScreen(
-                    onLoginSuccess       = {
+                    showRegistrationSuccess = showRegistrationSuccess,
+                    onLoginSuccess          = {
                         navController.navigate(Routes.ACTIVITY_FEED) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
@@ -63,7 +72,7 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
             composable(Routes.REGISTER) {
                 RegisterScreen(
                     onRegisterSuccess = {
-                        navController.navigate(Routes.ACTIVITY_FEED) {
+                        navController.navigate("${Routes.LOGIN}?registered=true") {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     },
@@ -80,7 +89,24 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
 
             composable(Routes.SEARCH) {
                 SearchScreen(
-                    onMediaClick = { mediaId -> navController.navigate("media_detail/$mediaId") }
+                    onSearch = { query ->
+                        navController.navigate("search_results?query=$query")
+                    }
+                )
+            }
+
+            composable(
+                route     = Routes.SEARCH_RESULTS,
+                arguments = listOf(navArgument("query") {
+                    type         = NavType.StringType
+                    defaultValue = ""
+                })
+            ) { backStackEntry ->
+                val query = backStackEntry.arguments?.getString("query") ?: ""
+                SearchResultsScreen(
+                    initialQuery   = query,
+                    onMediaClick   = { mediaId -> navController.navigate("media_detail/$mediaId") },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

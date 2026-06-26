@@ -62,7 +62,7 @@ fun RegisterScreen(
         Icon(
             imageVector        = Icons.Filled.SmartDisplay,
             contentDescription = null,
-            tint               = MaterialTheme.colorScheme.primary,
+            tint               = MaterialTheme.colorScheme.primaryContainer,
             modifier           = Modifier.size(48.dp)
         )
 

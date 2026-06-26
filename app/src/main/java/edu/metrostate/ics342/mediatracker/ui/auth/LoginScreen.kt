@@ -48,8 +48,12 @@ fun LoginScreen(
         }
     }
 
+
+
     val isLoading = loginState is AuthViewModel.AuthUiState.Loading
     val errorMsg  = (loginState as? AuthViewModel.AuthUiState.Error)?.msgResId?.let { stringResource(it) }
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(

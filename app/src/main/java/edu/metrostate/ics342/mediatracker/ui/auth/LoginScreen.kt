@@ -1,8 +1,13 @@
 package edu.metrostate.ics342.mediatracker.ui.auth
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SmartDisplay
+import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -48,12 +53,8 @@ fun LoginScreen(
         }
     }
 
-
-
     val isLoading = loginState is AuthViewModel.AuthUiState.Loading
     val errorMsg  = (loginState as? AuthViewModel.AuthUiState.Error)?.msgResId?.let { stringResource(it) }
-
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -63,10 +64,28 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(12.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector        = Icons.Outlined.SmartDisplay,
+                    contentDescription = null,
+                    tint               = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier           = Modifier.size(32.dp)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+
             Text(
                 stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(Modifier.height(8.dp))
@@ -85,6 +104,10 @@ fun LoginScreen(
                 onValueChange   = viewModel::onEmailChange,
                 label           = { Text(stringResource(R.string.email_label)) },
                 singleLine      = true,
+                shape           = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction    = ImeAction.Next
@@ -102,6 +125,10 @@ fun LoginScreen(
                 onValueChange        = viewModel::onPasswordChange,
                 label                = { Text(stringResource(R.string.password_label)) },
                 singleLine           = true,
+                shape                = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                ),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -127,6 +154,11 @@ fun LoginScreen(
             Button(
                 onClick  = { focusManager.clearFocus(); viewModel.onLoginClick() },
                 enabled  = !isLoading,
+                shape    = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor   = MaterialTheme.colorScheme.onPrimary
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
@@ -144,8 +176,21 @@ fun LoginScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            TextButton(onClick = onNavigateToRegister) {
-                Text(stringResource(R.string.register_prompt))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text  = stringResource(R.string.register_prompt),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                TextButton(onClick = onNavigateToRegister) {
+                    Text(
+                        text  = stringResource(R.string.register_action),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
 

@@ -1,6 +1,5 @@
 package edu.metrostate.ics342.mediatracker.ui.library
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -25,6 +24,12 @@ import coil.compose.AsyncImage
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
+import edu.metrostate.ics342.mediatracker.theme.FinishedContainer
+import edu.metrostate.ics342.mediatracker.theme.InProgressContainer
+import edu.metrostate.ics342.mediatracker.theme.OnFinishedContainer
+import edu.metrostate.ics342.mediatracker.theme.OnInProgressContainer
+import edu.metrostate.ics342.mediatracker.theme.OnWantToContainer
+import edu.metrostate.ics342.mediatracker.theme.WantToContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,10 +62,23 @@ fun LibraryScreen(
                 "albums" to edu.metrostate.ics342.mediatracker.R.string.filter_albums,
             )
                 .forEach { (key, labelRes) ->
+                    val isSelected = selectedType == key
                     FilterChip(
-                        selected = selectedType == key,
+                        selected = isSelected,
                         onClick  = { selectedType = key },
-                        label    = { Text(stringResource(labelRes)) }
+                        label    = { Text(stringResource(labelRes)) },
+                        shape    = RoundedCornerShape(8.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor         = MaterialTheme.colorScheme.surface,
+                            labelColor             = MaterialTheme.colorScheme.onSurfaceVariant,
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor     = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            enabled     = true,
+                            selected    = isSelected,
+                            borderColor = MaterialTheme.colorScheme.outline
+                        )
                     )
                 }
         }
@@ -143,6 +161,12 @@ private fun LibraryItemCard(
     var menuExpanded by remember { mutableStateOf(false) }
     var statusDialogVisible by remember { mutableStateOf(false) }
 
+    val (badgeContainer, badgeOnContainer) = when (item.status) {
+        LibraryStatus.WANT_TO     -> WantToContainer to OnWantToContainer
+        LibraryStatus.IN_PROGRESS -> InProgressContainer to OnInProgressContainer
+        LibraryStatus.FINISHED    -> FinishedContainer to OnFinishedContainer
+    }
+
     if (statusDialogVisible) {
         AlertDialog(
             onDismissRequest = { statusDialogVisible = false },
@@ -167,7 +191,8 @@ private fun LibraryItemCard(
     Card(
         modifier  = Modifier.fillMaxWidth().clickable { onClick() },
         shape     = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        colors    = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -208,8 +233,17 @@ private fun LibraryItemCard(
                 Spacer(Modifier.height(6.dp))
                 SuggestionChip(
                     onClick = { statusDialogVisible = true },
-                    label   = { Text(stringResource(item.status.labelRes),
-                        style = MaterialTheme.typography.labelSmall) }
+                    label   = {
+                        Text(
+                            stringResource(item.status.labelRes),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    },
+                    colors = SuggestionChipDefaults.suggestionChipColors(
+                        containerColor = badgeContainer,
+                        labelColor     = badgeOnContainer
+                    ),
+                    border = null
                 )
             }
 

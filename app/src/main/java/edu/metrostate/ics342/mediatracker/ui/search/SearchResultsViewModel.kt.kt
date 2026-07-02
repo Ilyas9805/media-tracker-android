@@ -57,7 +57,6 @@ class SearchResultsViewModel(application: Application) : AndroidViewModel(applic
                 nextCursor     = page.nextCursor
                 hasMore        = page.hasMore
             } catch (e: Exception) {
-                // network errors silently ignored
             } finally {
                 _isLoading.value = false
             }

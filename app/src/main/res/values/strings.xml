@@ -10,8 +10,10 @@
     <string name="confirm_password_label">Confirm Password</string>
     <string name="sign_in_button">Sign In</string>
     <string name="sign_up_button">Sign Up</string>
-    <string name="register_prompt">Don\'t have an account? Register</string>
-    <string name="login_prompt">Already have an account? Log In</string>
+    <string name="register_prompt">Don\'t have an account?</string>
+    <string name="register_action">Sign Up</string>
+    <string name="login_prompt">Already have an account?</string>
+    <string name="login_action">Log In?</string>
     <string name="register_title">Create Account</string>
     <string name="register_tagline">Join the community</string>
     <string name="register_success">Account created! Please sign in.</string>
@@ -40,6 +42,7 @@
     <string name="action_more_options">More options</string>
     <string name="action_change_status">Change status</string>
     <string name="action_remove_from_library">Remove from library</string>
+    <string name="search_results_count">%1$d results</string>
 
     <!-- Profile -->
     <string name="profile_title">Profile</string>

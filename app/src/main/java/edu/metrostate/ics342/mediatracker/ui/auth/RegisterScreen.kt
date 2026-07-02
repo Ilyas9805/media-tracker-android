@@ -1,12 +1,14 @@
 package edu.metrostate.ics342.mediatracker.ui.auth
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SmartDisplay
+import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -59,19 +61,29 @@ fun RegisterScreen(
         verticalArrangement   = Arrangement.Center,
         horizontalAlignment   = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector        = Icons.Filled.SmartDisplay,
-            contentDescription = null,
-            tint               = MaterialTheme.colorScheme.primaryContainer,
-            modifier           = Modifier.size(48.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(12.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector        = Icons.Outlined.SmartDisplay,
+                contentDescription = null,
+                tint               = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier           = Modifier.size(32.dp)
+            )
+        }
 
         Spacer(Modifier.height(8.dp))
 
         Text(
             stringResource(R.string.register_title),
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(Modifier.height(8.dp))
@@ -90,6 +102,10 @@ fun RegisterScreen(
             onValueChange   = viewModel::onDisplayNameChange,
             label           = { Text(stringResource(R.string.display_name_label)) },
             singleLine      = true,
+            shape           = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 imeAction    = ImeAction.Next
@@ -107,6 +123,10 @@ fun RegisterScreen(
             onValueChange   = viewModel::onEmailChange,
             label           = { Text(stringResource(R.string.email_label)) },
             singleLine      = true,
+            shape           = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction    = ImeAction.Next
@@ -124,6 +144,10 @@ fun RegisterScreen(
             onValueChange   = viewModel::onUsernameChange,
             label           = { Text(stringResource(R.string.username_label)) },
             singleLine      = true,
+            shape           = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 imeAction    = ImeAction.Next
@@ -141,6 +165,10 @@ fun RegisterScreen(
             onValueChange        = viewModel::onPasswordChange,
             label                = { Text(stringResource(R.string.password_label)) },
             singleLine           = true,
+            shape                = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -159,6 +187,10 @@ fun RegisterScreen(
             onValueChange        = viewModel::onConfirmPasswordChange,
             label                = { Text(stringResource(R.string.confirm_password_label)) },
             singleLine           = true,
+            shape                = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -184,6 +216,11 @@ fun RegisterScreen(
         Button(
             onClick  = { focusManager.clearFocus(); viewModel.onRegisterClick() },
             enabled  = !isLoading,
+            shape    = RoundedCornerShape(20.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor   = MaterialTheme.colorScheme.onPrimary
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -201,8 +238,21 @@ fun RegisterScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        TextButton(onClick = onNavigateToLogin) {
-            Text(stringResource(R.string.login_prompt))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text  = stringResource(R.string.login_prompt),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            TextButton(onClick = onNavigateToLogin) {
+                Text(
+                    text  = stringResource(R.string.login_action),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }

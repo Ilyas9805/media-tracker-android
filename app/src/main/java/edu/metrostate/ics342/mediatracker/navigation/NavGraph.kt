@@ -91,7 +91,8 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
                 SearchScreen(
                     onSearch = { query ->
                         navController.navigate("search_results?query=$query")
-                    }
+                    },
+                    onMediaClick = { mediaId -> navController.navigate("media_detail/$mediaId") }
                 )
             }
 

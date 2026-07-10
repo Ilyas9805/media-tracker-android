@@ -89,9 +89,7 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
 
             composable(Routes.SEARCH) {
                 SearchScreen(
-                    onSearch = { query ->
-                        navController.navigate("search_results?query=$query")
-                    },
+                    onSearch     = { query -> navController.navigate("search_results?query=$query") },
                     onMediaClick = { mediaId -> navController.navigate("media_detail/$mediaId") }
                 )
             }
@@ -117,11 +115,15 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
                 )
             }
 
-            composable(route = Routes.MEDIA_DETAIL) {
+            composable(
+                route     = Routes.MEDIA_DETAIL,
+                arguments = listOf(navArgument("mediaId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val mediaId = backStackEntry.arguments?.getInt("mediaId") ?: return@composable
                 MediaDetailScreen(
-                    mediaId        = -1,
+                    mediaId        = mediaId,
                     onNavigateBack = { navController.popBackStack() },
-                    onWriteReview  = { mediaId -> navController.navigate("write_review/$mediaId") }
+                    onWriteReview  = { id -> navController.navigate("write_review/$id") }
                 )
             }
 

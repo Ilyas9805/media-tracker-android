@@ -16,12 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
+import edu.metrostate.ics342.mediatracker.R
+import edu.metrostate.ics342.mediatracker.data.model.LibraryEntry
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
 import edu.metrostate.ics342.mediatracker.theme.FinishedContainer
@@ -37,15 +40,16 @@ fun LibraryScreen(
     onMediaClick: (Int) -> Unit,
     viewModel: LibraryViewModel = viewModel()
 ) {
-    val items     by viewModel.libraryItems.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val items          by viewModel.libraryItems.collectAsState()
+    val isLoading      by viewModel.isLoading.collectAsState()
     val selectedStatus by viewModel.filterState.collectAsState()
 
     var selectedType by remember { mutableStateOf("all") }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.library_title)) })
+        TopAppBar(title = { Text(stringResource(R.string.library_title)) })
 
+        // ── Type filter chips ─────────────────────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -54,35 +58,35 @@ fun LibraryScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             listOf(
-                "all"   to edu.metrostate.ics342.mediatracker.R.string.filter_all,
-                "book"  to edu.metrostate.ics342.mediatracker.R.string.filter_books,
-                "movie" to edu.metrostate.ics342.mediatracker.R.string.filter_movies,
-                "show"  to edu.metrostate.ics342.mediatracker.R.string.filter_shows,
-                "comics" to edu.metrostate.ics342.mediatracker.R.string.filter_comics,
-                "albums" to edu.metrostate.ics342.mediatracker.R.string.filter_albums,
-            )
-                .forEach { (key, labelRes) ->
-                    val isSelected = selectedType == key
-                    FilterChip(
-                        selected = isSelected,
-                        onClick  = { selectedType = key },
-                        label    = { Text(stringResource(labelRes)) },
-                        shape    = RoundedCornerShape(8.dp),
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor         = MaterialTheme.colorScheme.surface,
-                            labelColor             = MaterialTheme.colorScheme.onSurfaceVariant,
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedLabelColor     = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled     = true,
-                            selected    = isSelected,
-                            borderColor = MaterialTheme.colorScheme.outline
-                        )
+                "all"    to R.string.filter_all,
+                "book"   to R.string.filter_books,
+                "movie"  to R.string.filter_movies,
+                "show"   to R.string.filter_shows,
+                "comics" to R.string.filter_comics,
+                "albums" to R.string.filter_albums,
+            ).forEach { (key, labelRes) ->
+                val isSelected = selectedType == key
+                FilterChip(
+                    selected = isSelected,
+                    onClick  = { selectedType = key },
+                    label    = { Text(stringResource(labelRes)) },
+                    shape    = RoundedCornerShape(8.dp),
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor         = MaterialTheme.colorScheme.surface,
+                        labelColor             = MaterialTheme.colorScheme.onSurfaceVariant,
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor     = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled     = true,
+                        selected    = isSelected,
+                        borderColor = MaterialTheme.colorScheme.outline
                     )
-                }
+                )
+            }
         }
 
+        // ── Status segmented button ───────────────────────────────────
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -91,7 +95,9 @@ fun LibraryScreen(
             LibraryStatus.values().forEachIndexed { index, status ->
                 SegmentedButton(
                     shape    = SegmentedButtonDefaults.itemShape(
-                        index = index, count = LibraryStatus.values().size),
+                        index = index,
+                        count = LibraryStatus.values().size
+                    ),
                     selected = selectedStatus == status,
                     onClick  = { viewModel.updateFilter(status) },
                     label    = { Text(stringResource(status.labelRes)) }
@@ -108,43 +114,47 @@ fun LibraryScreen(
             return@Column
         }
 
-        val filteredItems = items
-            .filter { it.status == selectedStatus }
-            .filter { selectedType == "all" || it.media.mediaType == selectedType }
+        val filteredItems = items.filter { entry ->
+            selectedType == "all" || entry.media?.mediaType == selectedType
+        }
 
         if (filteredItems.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
+                modifier         = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    stringResource(edu.metrostate.ics342.mediatracker.R.string.library_empty),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    stringResource(R.string.library_empty),
+                    style     = MaterialTheme.typography.bodyLarge,
+                    color     = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
                 )
             }
             return@Column
         }
 
         Text(
-            if (filteredItems.size == 1) stringResource(edu.metrostate.ics342.mediatracker.R.string.library_item_count, filteredItems.size)
-            else stringResource(edu.metrostate.ics342.mediatracker.R.string.library_items_count, filteredItems.size),
+            text     = if (filteredItems.size == 1)
+                stringResource(R.string.library_item_count, filteredItems.size)
+            else
+                stringResource(R.string.library_items_count, filteredItems.size),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             style    = MaterialTheme.typography.labelMedium,
             color    = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+            contentPadding      = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(filteredItems, key = { it.mediaId }) { item ->
-                LibraryItemCard(
-                    item           = item,
-                    onClick        = { onMediaClick(item.mediaId) },
-                    onRemove       = { viewModel.removeItem(item.mediaId) },
-                    onStatusChange = { newStatus -> viewModel.updateStatus(item.mediaId, newStatus) }
+            items(filteredItems, key = { it.mediaId }) { entry ->
+                LibraryEntryCard(
+                    entry          = entry,
+                    onClick        = { onMediaClick(entry.mediaId) },
+                    onRemove       = { viewModel.removeItem(entry.mediaId) },
+                    onStatusChange = { newStatus -> viewModel.changeStatus(entry.mediaId, newStatus) }
                 )
             }
         }
@@ -152,38 +162,50 @@ fun LibraryScreen(
 }
 
 @Composable
-private fun LibraryItemCard(
-    item: LibraryItem,
+private fun LibraryEntryCard(
+    entry: LibraryEntry,
     onClick: () -> Unit,
     onRemove: () -> Unit,
-    onStatusChange: (LibraryStatus) -> Unit
+    onStatusChange: (String) -> Unit
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-    var statusDialogVisible by remember { mutableStateOf(false) }
+    val context          = LocalContext.current
+    val media            = entry.media
+    var menuExpanded     by remember { mutableStateOf(false) }
+    var showStatusDialog by remember { mutableStateOf(false) }
 
-    val (badgeContainer, badgeOnContainer) = when (item.status) {
-        LibraryStatus.WANT_TO     -> WantToContainer to OnWantToContainer
-        LibraryStatus.IN_PROGRESS -> InProgressContainer to OnInProgressContainer
-        LibraryStatus.FINISHED    -> FinishedContainer to OnFinishedContainer
+    val (badgeContainer, badgeOnContainer) = when (entry.status) {
+        "want_to"     -> WantToContainer     to OnWantToContainer
+        "in_progress" -> InProgressContainer to OnInProgressContainer
+        else          -> FinishedContainer   to OnFinishedContainer
     }
 
-    if (statusDialogVisible) {
+    // ── Status change dialog ──────────────────────────────────────────
+    if (showStatusDialog) {
         AlertDialog(
-            onDismissRequest = { statusDialogVisible = false },
-            title = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_change_status)) },
+            onDismissRequest = { showStatusDialog = false },
+            title = { Text(stringResource(R.string.action_change_status)) },
             text = {
                 Column {
-                    LibraryStatus.values().forEach { s ->
+                    listOf(
+                        "want_to"     to stringResource(R.string.status_want_to),
+                        "in_progress" to stringResource(R.string.status_in_progress),
+                        "finished"    to stringResource(R.string.status_finished)
+                    ).forEach { (key, label) ->
                         TextButton(
-                            onClick  = { onStatusChange(s); statusDialogVisible = false },
+                            onClick  = {
+                                onStatusChange(key)
+                                showStatusDialog = false
+                            },
                             modifier = Modifier.fillMaxWidth()
-                        ) { Text(stringResource(s.labelRes)) }
+                        ) { Text(label) }
                     }
                 }
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { statusDialogVisible = false }) { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_cancel_button)) }
+                TextButton(onClick = { showStatusDialog = false }) {
+                    Text(stringResource(R.string.settings_cancel_button))
+                }
             }
         )
     }
@@ -195,27 +217,39 @@ private fun LibraryItemCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+
+            // ── Cover ─────────────────────────────────────────────────
             Box(
-                modifier = Modifier
+                modifier         = Modifier
                     .size(64.dp, 90.dp)
                     .clip(RoundedCornerShape(6.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (item.media.coverUrl != null) {
+                if (media?.coverUrl != null) {
                     AsyncImage(
-                        model             = item.media.coverUrl,
-                        contentDescription = item.media.title,
-                        contentScale      = ContentScale.Crop,
-                        modifier          = Modifier.fillMaxSize()
+                        model              = media.coverUrl,
+                        contentDescription = media.title,
+                        contentScale       = ContentScale.Crop,
+                        modifier           = Modifier.fillMaxSize()
                     )
                 } else {
-                    Surface(color = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.fillMaxSize()) {
+                    Surface(
+                        color    = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text(when (item.media.mediaType) {
-                                "book" -> "📖"; "movie" -> "🎬"; "show" -> "📺"
-                                else -> "?"
-                            }, style = MaterialTheme.typography.titleLarge)
+                            Icon(
+                                painter = painterResource(
+                                    when (media?.mediaType) {
+                                        "book"  -> R.drawable.menu_book_
+                                        "movie" -> R.drawable.movie
+                                        else    -> R.drawable.tv
+                                    }
+                                ),
+                                contentDescription = null,
+                                tint               = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier           = Modifier.size(32.dp)
+                            )
                         }
                     }
                 }
@@ -223,19 +257,30 @@ private fun LibraryItemCard(
 
             Spacer(Modifier.width(12.dp))
 
+            // ── Info ──────────────────────────────────────────────────
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.media.title, style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold, maxLines = 2)
+                Text(
+                    text       = media?.title ?: "Unknown",
+                    style      = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines   = 2
+                )
                 Spacer(Modifier.height(2.dp))
-                Text(item.media.creatorCredit(LocalContext.current),
+                Text(
+                    text  = media?.creatorCredit(context) ?: "",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Spacer(Modifier.height(6.dp))
                 SuggestionChip(
-                    onClick = { statusDialogVisible = true },
+                    onClick = { },
                     label   = {
                         Text(
-                            stringResource(item.status.labelRes),
+                            text  = when (entry.status) {
+                                "want_to"     -> stringResource(R.string.status_want_to)
+                                "in_progress" -> stringResource(R.string.status_in_progress)
+                                else          -> stringResource(R.string.status_finished)
+                            },
                             style = MaterialTheme.typography.labelSmall
                         )
                     },
@@ -247,22 +292,36 @@ private fun LibraryItemCard(
                 )
             }
 
+            // ── Three dot menu ────────────────────────────────────────
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Outlined.MoreVert, stringResource(edu.metrostate.ics342.mediatracker.R.string.action_more_options))
+                    Icon(
+                        Icons.Outlined.MoreVert,
+                        contentDescription = stringResource(R.string.action_more_options)
+                    )
                 }
                 DropdownMenu(
                     expanded         = menuExpanded,
                     onDismissRequest = { menuExpanded = false }
                 ) {
                     DropdownMenuItem(
-                        text    = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_change_status)) },
-                        onClick = { menuExpanded = false; statusDialogVisible = true }
+                        text    = { Text(stringResource(R.string.action_change_status)) },
+                        onClick = {
+                            menuExpanded     = false
+                            showStatusDialog = true
+                        }
                     )
                     DropdownMenuItem(
-                        text    = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_remove_from_library),
-                            color = MaterialTheme.colorScheme.error) },
-                        onClick = { menuExpanded = false; onRemove() }
+                        text    = {
+                            Text(
+                                stringResource(R.string.action_remove_from_library),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            onRemove()
+                        }
                     )
                 }
             }

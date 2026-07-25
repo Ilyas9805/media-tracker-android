@@ -9,8 +9,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.StarHalf
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
@@ -26,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import edu.metrostate.ics342.mediatracker.R
-import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.model.Media
 import edu.metrostate.ics342.mediatracker.data.model.Review
 import edu.metrostate.ics342.mediatracker.data.model.UserProfile
@@ -69,7 +69,9 @@ fun MediaDetailScreen(
     onWriteReview: (Int) -> Unit,
     viewModel: MediaDetailViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState       by viewModel.uiState.collectAsState()
+    val libraryStatus by viewModel.libraryStatus.collectAsState()
+    val isFavorited   by viewModel.isFavorited.collectAsState()
 
     LaunchedEffect(mediaId) {
         viewModel.loadMedia(mediaId)
@@ -93,9 +95,13 @@ fun MediaDetailScreen(
         }
         is MediaDetailViewModel.UiState.Success -> {
             MediaDetailContent(
-                media          = state.media,
-                onNavigateBack = onNavigateBack,
-                onWriteReview  = onWriteReview
+                media            = state.media,
+                libraryStatus    = libraryStatus,
+                isFavorited      = isFavorited,
+                onNavigateBack   = onNavigateBack,
+                onWriteReview    = onWriteReview,
+                onStatusSelected = { status -> viewModel.onLibraryStatusSelected(mediaId, status) },
+                onFavoriteClick  = { viewModel.onFavoriteClick(mediaId) }
             )
         }
     }
@@ -105,12 +111,15 @@ fun MediaDetailScreen(
 @Composable
 private fun MediaDetailContent(
     media: Media,
+    libraryStatus: String?,
+    isFavorited: Boolean,
     onNavigateBack: () -> Unit,
-    onWriteReview: (Int) -> Unit
+    onWriteReview: (Int) -> Unit,
+    onStatusSelected: (String) -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     val context            = LocalContext.current
     var menuExpanded       by remember { mutableStateOf(false) }
-    var libraryStatus      by remember { mutableStateOf<LibraryStatus?>(null) }
     var statusMenuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -335,10 +344,10 @@ private fun MediaDetailContent(
                     ) {
                         Text(
                             text = when (libraryStatus) {
-                                LibraryStatus.WANT_TO     -> "Want To"
-                                LibraryStatus.IN_PROGRESS -> "In Progress"
-                                LibraryStatus.FINISHED    -> "Finished"
-                                null                      -> "+ Want To"
+                                "want_to"     -> "Want To"
+                                "in_progress" -> "In Progress"
+                                "finished"    -> "Finished"
+                                else          -> "+ Want To"
                             }
                         )
                     }
@@ -346,29 +355,32 @@ private fun MediaDetailContent(
                         expanded         = statusMenuExpanded,
                         onDismissRequest = { statusMenuExpanded = false }
                     ) {
-                        LibraryStatus.values().forEach { status ->
-                            DropdownMenuItem(
-                                text    = {
-                                    Text(
-                                        when (status) {
-                                            LibraryStatus.WANT_TO     -> "Want To"
-                                            LibraryStatus.IN_PROGRESS -> "In Progress"
-                                            LibraryStatus.FINISHED    -> "Finished"
-                                        }
-                                    )
-                                },
-                                onClick = {
-                                    libraryStatus      = status
-                                    statusMenuExpanded = false
-                                    // TODO: call POST /library when API is wired
-                                }
-                            )
-                        }
+                        DropdownMenuItem(
+                            text    = { Text("Want To") },
+                            onClick = {
+                                onStatusSelected("want_to")
+                                statusMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text    = { Text("In Progress") },
+                            onClick = {
+                                onStatusSelected("in_progress")
+                                statusMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text    = { Text("Finished") },
+                            onClick = {
+                                onStatusSelected("finished")
+                                statusMenuExpanded = false
+                            }
+                        )
                     }
                 }
 
                 OutlinedButton(
-                    onClick  = { },
+                    onClick  = onFavoriteClick,
                     shape    = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
@@ -376,14 +388,17 @@ private fun MediaDetailContent(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        Icons.Outlined.Favorite,
+                        imageVector = if (isFavorited)
+                            Icons.Filled.Favorite
+                        else
+                            Icons.Outlined.FavoriteBorder,
                         contentDescription = null,
                         tint     = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text  = "Save",
+                        text  = if (isFavorited) "Saved" else "Save",
                         color = MaterialTheme.colorScheme.primary
                     )
                 }

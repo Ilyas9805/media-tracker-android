@@ -29,6 +29,7 @@ interface MediaApiService {
     suspend fun getMediaById(@Path("id") id: Int): Response<Media>
 
     // ── Library ───────────────────────────────────────────────────────────
+    // ── Library ───────────────────────────────────────────────────────────
     @GET("library")
     suspend fun getLibrary(
         @Query("status") status: String? = null

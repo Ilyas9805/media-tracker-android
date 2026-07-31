@@ -29,6 +29,7 @@ class PrioritiesViewModel(application: Application) : AndroidViewModel(applicati
         loadPriorities()
     }
 
+    //API
     fun loadPriorities() {
         viewModelScope.launch {
             _isLoading.value = true

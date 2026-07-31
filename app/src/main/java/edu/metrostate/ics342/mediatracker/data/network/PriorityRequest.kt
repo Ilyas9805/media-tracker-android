@@ -3,6 +3,7 @@ package edu.metrostate.ics342.mediatracker.data.network
 import kotlinx.serialization.Serializable
 
 @Serializable
+//API
 data class PriorityRequest(
     val mediaId            : Int,
     val priority           : Int,

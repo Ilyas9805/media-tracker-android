@@ -1,7 +1,7 @@
 package edu.metrostate.ics342.mediatracker.data
 
 import edu.metrostate.ics342.mediatracker.data.model.Media
-
+//API
 
 interface MediaRepository {
     suspend fun searchMedia(

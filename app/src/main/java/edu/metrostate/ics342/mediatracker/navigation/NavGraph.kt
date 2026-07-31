@@ -33,7 +33,7 @@ private val bottomNavRoutes = setOf(
     Routes.CONNECTIONS,
     Routes.MY_PROFILE,
 )
-
+//API
 @Composable
 fun MediaTrackerNavGraph(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()

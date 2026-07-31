@@ -3,14 +3,16 @@ package edu.metrostate.ics342.mediatracker.data.network
 import edu.metrostate.ics342.mediatracker.data.model.FavoriteEntry
 import edu.metrostate.ics342.mediatracker.data.model.LibraryEntry
 import edu.metrostate.ics342.mediatracker.data.model.Media
+import edu.metrostate.ics342.mediatracker.data.model.Priority
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.DELETE
 
 interface MediaApiService {
 
@@ -56,4 +58,11 @@ interface MediaApiService {
 
     @DELETE("library/{mediaId}")
     suspend fun removeFromLibrary(@Path("mediaId") mediaId: Int): Response<Unit>
+
+    // ── Priorities ────────────────────────────────────────────────────────
+    @GET("priorities")
+    suspend fun getPriorities(): Response<List<Priority>>
+
+    @PUT("priorities")
+    suspend fun setPriorities(@Body body: SetPrioritiesRequest): Response<List<Priority>>
 }

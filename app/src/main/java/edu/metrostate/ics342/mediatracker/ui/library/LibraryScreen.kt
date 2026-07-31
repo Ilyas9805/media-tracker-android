@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,8 +38,9 @@ import edu.metrostate.ics342.mediatracker.theme.WantToContainer
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
-    onMediaClick: (Int) -> Unit,
-    viewModel: LibraryViewModel = viewModel()
+    onMediaClick      : (Int) -> Unit,
+    onPrioritiesClick : () -> Unit,
+    viewModel         : LibraryViewModel = viewModel()
 ) {
     val items          by viewModel.libraryItems.collectAsState()
     val isLoading      by viewModel.isLoading.collectAsState()
@@ -48,6 +50,44 @@ fun LibraryScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(title = { Text(stringResource(R.string.library_title)) })
+
+        // ── Priorities entry point ────────────────────────────────────
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .clickable { onPrioritiesClick() },
+            shape     = RoundedCornerShape(12.dp),
+            colors    = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Row(
+                modifier          = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector        = Icons.Outlined.Star,
+                    contentDescription = null,
+                    tint               = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier           = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text       = "My Priorities",
+                    style      = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color      = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text  = "View →",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
 
         // ── Type filter chips ─────────────────────────────────────────
         Row(
@@ -237,7 +277,10 @@ private fun LibraryEntryCard(
                         color    = MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier         = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(
                                 painter = painterResource(
                                     when (media?.mediaType) {

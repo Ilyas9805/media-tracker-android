@@ -244,7 +244,7 @@ private fun PriorityCard(
                 }
             }
 
-            //API
+
             // ── Remove button ─────────────────────────────────────────
             TextButton(onClick = onRemove) {
                 Text(

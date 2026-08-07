@@ -166,13 +166,13 @@ class DefaultMediaRepository(
         }
     }
 
-    suspend fun setPriorities(priorities: List<PriorityRequest>): List<Priority> {
+    suspend fun setPriority(request: PriorityRequest): Priority? {
         return try {
-            val response = api.setPriorities(SetPrioritiesRequest(priorities))
-            if (response.isSuccessful) response.body() ?: emptyList()
-            else emptyList()
+            val response = api.setPriority(request)
+            if (response.isSuccessful) response.body()
+            else null
         } catch (e: IOException) {
-            emptyList()
+            null
         }
     }
 }

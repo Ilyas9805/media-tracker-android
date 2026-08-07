@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Star
@@ -20,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,8 +37,6 @@ import edu.metrostate.ics342.mediatracker.theme.OnInProgressContainer
 import edu.metrostate.ics342.mediatracker.theme.OnWantToContainer
 import edu.metrostate.ics342.mediatracker.theme.WantToContainer
 
-
-//API
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
@@ -196,7 +196,10 @@ fun LibraryScreen(
                     entry          = entry,
                     onClick        = { onMediaClick(entry.mediaId) },
                     onRemove       = { viewModel.removeItem(entry.mediaId) },
-                    onStatusChange = { newStatus -> viewModel.changeStatus(entry.mediaId, newStatus) }
+                    onStatusChange = { newStatus -> viewModel.changeStatus(entry.mediaId, newStatus) },
+                    onAddToPriorities = { mediaId, priority, hours, notes ->
+                        viewModel.addToPriorities(mediaId, priority, hours, notes)
+                    }
                 )
             }
         }
@@ -205,15 +208,17 @@ fun LibraryScreen(
 
 @Composable
 private fun LibraryEntryCard(
-    entry: LibraryEntry,
-    onClick: () -> Unit,
-    onRemove: () -> Unit,
-    onStatusChange: (String) -> Unit
+    entry            : LibraryEntry,
+    onClick          : () -> Unit,
+    onRemove         : () -> Unit,
+    onStatusChange   : (String) -> Unit,
+    onAddToPriorities: (Int, Int, Float, String?) -> Unit
 ) {
     val context          = LocalContext.current
     val media            = entry.media
     var menuExpanded     by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
+    var showPriorityDialog by remember { mutableStateOf(false) }
 
     val (badgeContainer, badgeOnContainer) = when (entry.status) {
         "want_to"     -> WantToContainer     to OnWantToContainer
@@ -246,6 +251,96 @@ private fun LibraryEntryCard(
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { showStatusDialog = false }) {
+                    Text(stringResource(R.string.settings_cancel_button))
+                }
+            }
+        )
+    }
+
+    // ── Add to priorities dialog ──────────────────────────────────────
+    if (showPriorityDialog) {
+        var selectedPriority by remember { mutableStateOf(1) }
+        var estimatedHours   by remember { mutableStateOf("") }
+        var notes            by remember { mutableStateOf("") }
+
+        AlertDialog(
+            onDismissRequest = { showPriorityDialog = false },
+            title = { Text("Add to Priorities") },
+            text  = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+                    // Priority level
+                    Text(
+                        text  = "Priority Level",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(1 to "High", 2 to "Medium", 3 to "Low").forEach { (level, label) ->
+                            FilterChip(
+                                selected = selectedPriority == level,
+                                onClick  = { selectedPriority = level },
+                                label    = { Text(label) },
+                                shape    = RoundedCornerShape(8.dp),
+                                colors   = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor     = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            )
+                        }
+                    }
+
+                    // Estimated hours
+                    OutlinedTextField(
+                        value         = estimatedHours,
+                        onValueChange = { estimatedHours = it },
+                        label         = { Text("Estimated Hours") },
+                        singleLine    = true,
+                        shape         = RoundedCornerShape(8.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Notes
+                    OutlinedTextField(
+                        value         = notes,
+                        onValueChange = { notes = it },
+                        label         = { Text("Notes (optional)") },
+                        singleLine    = true,
+                        shape         = RoundedCornerShape(8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val hours = estimatedHours.toFloatOrNull() ?: 0f
+                        onAddToPriorities(
+                            entry.mediaId,
+                            selectedPriority,
+                            hours,
+                            notes.ifBlank { null }
+                        )
+                        showPriorityDialog = false
+                    },
+                    shape  = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor   = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text("Add")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPriorityDialog = false }) {
                     Text(stringResource(R.string.settings_cancel_button))
                 }
             }
@@ -356,6 +451,16 @@ private fun LibraryEntryCard(
                             showStatusDialog = true
                         }
                     )
+                    // Only show Add to Priorities for Want To items
+                    if (entry.status == "want_to") {
+                        DropdownMenuItem(
+                            text    = { Text("Add to Priorities") },
+                            onClick = {
+                                menuExpanded       = false
+                                showPriorityDialog = true
+                            }
+                        )
+                    }
                     DropdownMenuItem(
                         text    = {
                             Text(

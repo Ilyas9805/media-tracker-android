@@ -65,5 +65,5 @@ interface MediaApiService {
     suspend fun getPriorities(): Response<List<Priority>>
 
     @PUT("priorities")
-    suspend fun setPriorities(@Body body: SetPrioritiesRequest): Response<List<Priority>>
+    suspend fun setPriority(@Body body: PriorityRequest): Response<Priority>
 }

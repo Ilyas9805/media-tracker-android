@@ -9,8 +9,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.StarHalf
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
@@ -23,57 +24,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import edu.metrostate.ics342.mediatracker.R
 import edu.metrostate.ics342.mediatracker.data.model.Media
 import edu.metrostate.ics342.mediatracker.data.model.Review
 import edu.metrostate.ics342.mediatracker.data.model.UserProfile
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
-
-// ── Hardcoded test data ───────────────────────────────────────────────────────
-private val fakeBook = Media(
-    id            = 1,
-    mediaType     = "book",
-    title         = "Dune",
-    author        = "Frank Herbert",
-    publishedYear = 1965,
-    averageRating = 4.8f,
-    ratingCount   = 1847,
-    genres        = listOf("Science Fiction", "Epic"),
-    description   = "Set in the distant future amidst a feudal interstellar society, Dune tells the story of young Paul Atreides as his family accepts stewardship of the desert planet Arrakis, the only source of the most precious substance in the universe.",
-    pageCount     = 688,
-    reviewCount   = 42
-)
-
-private val fakeMovie = Media(
-    id             = 5,
-    mediaType      = "movie",
-    title          = "Arrival",
-    director       = "Denis Villeneuve",
-    publishedYear  = 2016,
-    averageRating  = 4.5f,
-    ratingCount    = 1534,
-    genres         = listOf("Science Fiction", "Drama"),
-    description    = "When mysterious spacecraft touch down across the globe, an elite team is put together to investigate, including linguistics professor Louise Banks.",
-    runtimeMinutes = 116,
-    reviewCount    = 18
-)
-
-private val fakeShow = Media(
-    id            = 8,
-    mediaType     = "show",
-    title         = "Severance",
-    creator       = "Dan Erickson",
-    network       = "Apple TV+",
-    publishedYear = 2022,
-    averageRating = 4.9f,
-    ratingCount   = 1432,
-    genres        = listOf("Thriller", "Science Fiction", "Drama"),
-    description   = "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives.",
-    seasonCount   = 2,
-    episodeCount  = 19,
-    reviewCount   = 31
-)
 
 private val fakeReviews = listOf(
     Review(
@@ -104,27 +61,77 @@ private val fakeReviews = listOf(
     )
 )
 
-// ── Screen ────────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediaDetailScreen(
     mediaId: Int,
     onNavigateBack: () -> Unit,
-    onWriteReview: (Int) -> Unit
+    onWriteReview: (Int) -> Unit,
+    viewModel: MediaDetailViewModel = viewModel()
 ) {
-    val media = when (mediaId) {
-        5    -> fakeMovie
-        8    -> fakeShow
-        else -> fakeBook
+    val uiState       by viewModel.uiState.collectAsState()
+    val libraryStatus by viewModel.libraryStatus.collectAsState()
+    val isFavorited   by viewModel.isFavorited.collectAsState()
+
+    LaunchedEffect(mediaId) {
+        viewModel.loadMedia(mediaId)
     }
 
-    val context = LocalContext.current
-    var menuExpanded by remember { mutableStateOf(false) }
+    when (val state = uiState) {
+        is MediaDetailViewModel.UiState.Loading -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        is MediaDetailViewModel.UiState.NotFound -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Media not found.", color = MaterialTheme.colorScheme.error)
+            }
+        }
+        is MediaDetailViewModel.UiState.Error -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Something went wrong.", color = MaterialTheme.colorScheme.error)
+            }
+        }
+        is MediaDetailViewModel.UiState.Success -> {
+            MediaDetailContent(
+                media            = state.media,
+                libraryStatus    = libraryStatus,
+                isFavorited      = isFavorited,
+                onNavigateBack   = onNavigateBack,
+                onWriteReview    = onWriteReview,
+                onStatusSelected = { status -> viewModel.onLibraryStatusSelected(mediaId, status) },
+                onFavoriteClick  = { viewModel.onFavoriteClick(mediaId) }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MediaDetailContent(
+    media: Media,
+    libraryStatus: String?,
+    isFavorited: Boolean,
+    onNavigateBack: () -> Unit,
+    onWriteReview: (Int) -> Unit,
+    onStatusSelected: (String) -> Unit,
+    onFavoriteClick: () -> Unit
+) {
+    val context            = LocalContext.current
+    var menuExpanded       by remember { mutableStateOf(false) }
+    var statusMenuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {},
+                title = {
+                    Text(
+                        text       = media.title,
+                        style      = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -165,12 +172,22 @@ fun MediaDetailScreen(
                 contentAlignment = Alignment.Center
             ) {
                 if (media.coverUrl != null) {
-                    AsyncImage(
-                        model              = media.coverUrl,
-                        contentDescription = media.title,
-                        contentScale       = ContentScale.Crop,
-                        modifier           = Modifier.fillMaxSize()
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(
+                            model              = media.coverUrl,
+                            contentDescription = media.title,
+                            contentScale       = ContentScale.Fit,
+                            modifier           = Modifier
+                                .height(240.dp)
+                                .width(160.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                    }
                 } else {
                     val containerColor = when (media.mediaType) {
                         "book"  -> MaterialTheme.colorScheme.primaryContainer
@@ -284,24 +301,86 @@ fun MediaDetailScreen(
 
             Spacer(Modifier.height(20.dp))
 
+            // ── Genre chips ───────────────────────────────────────────
+            if (media.genres.isNotEmpty()) {
+                Row(
+                    modifier              = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    media.genres.forEach { genre ->
+                        SuggestionChip(
+                            onClick = { },
+                            label   = {
+                                Text(
+                                    genre,
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            },
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(20.dp))
+            }
+
             // ── Action buttons ────────────────────────────────────────
             Row(
-                modifier              = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                modifier              = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
-                    onClick  = { },
-                    shape    = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor   = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("+ Want To")
+                Box(modifier = Modifier.weight(1f)) {
+                    Button(
+                        onClick  = { statusMenuExpanded = true },
+                        shape    = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor   = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = when (libraryStatus) {
+                                "want_to"     -> "Want To"
+                                "in_progress" -> "In Progress"
+                                "finished"    -> "Finished"
+                                else          -> "+ Want To"
+                            }
+                        )
+                    }
+                    DropdownMenu(
+                        expanded         = statusMenuExpanded,
+                        onDismissRequest = { statusMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text    = { Text("Want To") },
+                            onClick = {
+                                onStatusSelected("want_to")
+                                statusMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text    = { Text("In Progress") },
+                            onClick = {
+                                onStatusSelected("in_progress")
+                                statusMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text    = { Text("Finished") },
+                            onClick = {
+                                onStatusSelected("finished")
+                                statusMenuExpanded = false
+                            }
+                        )
+                    }
                 }
+
                 OutlinedButton(
-                    onClick  = { },
+                    onClick  = onFavoriteClick,
                     shape    = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
@@ -309,14 +388,17 @@ fun MediaDetailScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        Icons.Outlined.Favorite,
+                        imageVector = if (isFavorited)
+                            Icons.Filled.Favorite
+                        else
+                            Icons.Outlined.FavoriteBorder,
                         contentDescription = null,
                         tint     = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text  = "Save",
+                        text  = if (isFavorited) "Saved" else "Save",
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -345,7 +427,9 @@ fun MediaDetailScreen(
 
             // ── Stat grid ─────────────────────────────────────────────
             Row(
-                modifier              = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                modifier              = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatBox(
@@ -385,7 +469,9 @@ fun MediaDetailScreen(
 
             // ── Reviews header ────────────────────────────────────────
             Row(
-                modifier              = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                modifier              = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment     = Alignment.CenterVertically
             ) {
@@ -404,12 +490,27 @@ fun MediaDetailScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // ── Review cards ──────────────────────────────────────────
-            fakeReviews.forEach { review ->
-                ReviewCard(
-                    review   = review,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
-                )
+            // ── Review cards or empty state ───────────────────────────
+            if (fakeReviews.isEmpty()) {
+                Box(
+                    modifier         = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text  = "No reviews yet. Be the first to write one!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                fakeReviews.forEach { review ->
+                    ReviewCard(
+                        review   = review,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
+                    )
+                }
             }
 
             Spacer(Modifier.height(32.dp))
@@ -474,13 +575,13 @@ private fun ReviewCard(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text  = displayName.firstOrNull()?.toString() ?: "?",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.background
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
                 Spacer(Modifier.width(10.dp))

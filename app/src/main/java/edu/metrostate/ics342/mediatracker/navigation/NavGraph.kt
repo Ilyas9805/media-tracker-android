@@ -17,6 +17,7 @@ import edu.metrostate.ics342.mediatracker.ui.auth.RegisterScreen
 import edu.metrostate.ics342.mediatracker.ui.connections.ConnectionsScreen
 import edu.metrostate.ics342.mediatracker.ui.detail.MediaDetailScreen
 import edu.metrostate.ics342.mediatracker.ui.library.LibraryScreen
+import edu.metrostate.ics342.mediatracker.ui.priorities.PrioritiesScreen
 import edu.metrostate.ics342.mediatracker.ui.profile.EditProfileScreen
 import edu.metrostate.ics342.mediatracker.ui.profile.MyProfileScreen
 import edu.metrostate.ics342.mediatracker.ui.profile.UserProfileScreen
@@ -32,7 +33,7 @@ private val bottomNavRoutes = setOf(
     Routes.CONNECTIONS,
     Routes.MY_PROFILE,
 )
-
+//API
 @Composable
 fun MediaTrackerNavGraph(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -89,9 +90,7 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
 
             composable(Routes.SEARCH) {
                 SearchScreen(
-                    onSearch = { query ->
-                        navController.navigate("search_results?query=$query")
-                    },
+                    onSearch     = { query -> navController.navigate("search_results?query=$query") },
                     onMediaClick = { mediaId -> navController.navigate("media_detail/$mediaId") }
                 )
             }
@@ -113,15 +112,27 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
 
             composable(Routes.LIBRARY) {
                 LibraryScreen(
-                    onMediaClick = { mediaId -> navController.navigate("media_detail/$mediaId") }
+                    onMediaClick      = { mediaId -> navController.navigate("media_detail/$mediaId") },
+                    onPrioritiesClick = { navController.navigate(Routes.PRIORITIES) }
                 )
             }
 
-            composable(route = Routes.MEDIA_DETAIL) {
-                MediaDetailScreen(
-                    mediaId        = -1,
+            composable(Routes.PRIORITIES) {
+                PrioritiesScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onWriteReview  = { mediaId -> navController.navigate("write_review/$mediaId") }
+                    onMediaClick   = { mediaId -> navController.navigate("media_detail/$mediaId") }
+                )
+            }
+
+            composable(
+                route     = Routes.MEDIA_DETAIL,
+                arguments = listOf(navArgument("mediaId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val mediaId = backStackEntry.arguments?.getInt("mediaId") ?: return@composable
+                MediaDetailScreen(
+                    mediaId        = mediaId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onWriteReview  = { id -> navController.navigate("write_review/$id") }
                 )
             }
 

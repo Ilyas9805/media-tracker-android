@@ -1,99 +1,205 @@
 package edu.metrostate.ics342.mediatracker.data
 
-import edu.metrostate.ics342.mediatracker.data.model.*
+import edu.metrostate.ics342.mediatracker.data.model.ActivityEvent
+import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
+import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
+import edu.metrostate.ics342.mediatracker.data.model.Media
+import edu.metrostate.ics342.mediatracker.data.model.UserProfile
 
-/**
- * Hardcoded fake data used throughout the app while real API integration is built out.
- *
- * This object stays in the project all semester. If a student falls behind on API wiring,
- * their app still runs and shows real-looking content.
- */
 object FakeMediaRepository {
 
-    val currentUser = UserProfile(
-        id           = "user-001",
-        email        = "alex@example.com",
-        username     = "alexreads",
-        displayName  = "Alex Chen",
-        bio          = "Avid reader and film buff. Always looking for the next great story.",
-        avatarUrl    = null,
-        followerCount  = 12,
-        followingCount = 8,
-        trackedCount   = 47,
-        createdAt    = "2023-09-01T00:00:00Z"
+    val mediaList: List<Media> = listOf(
+        Media(
+            id            = 1,
+            mediaType     = "book",
+            title         = "Dune",
+            author        = "Frank Herbert",
+            publishedYear = 1965,
+            averageRating = 4.8f,
+            ratingCount   = 1847,
+            genres        = listOf("Science Fiction", "Epic"),
+            description   = "Set in the distant future amidst a feudal interstellar society, Dune tells the story of young Paul Atreides as his family accepts stewardship of the desert planet Arrakis, the only source of the most precious substance in the universe.",
+            pageCount     = 688,
+            reviewCount   = 42
+        ),
+        Media(
+            id             = 2,
+            mediaType      = "movie",
+            title          = "Arrival",
+            director       = "Denis Villeneuve",
+            publishedYear  = 2016,
+            averageRating  = 4.5f,
+            ratingCount    = 1534,
+            genres         = listOf("Science Fiction", "Drama"),
+            description    = "When mysterious spacecraft touch down across the globe, an elite team is put together to investigate, including linguistics professor Louise Banks.",
+            runtimeMinutes = 116,
+            reviewCount    = 18
+        ),
+        Media(
+            id            = 3,
+            mediaType     = "show",
+            title         = "Severance",
+            creator       = "Dan Erickson",
+            network       = "Apple TV+",
+            publishedYear = 2022,
+            averageRating = 4.9f,
+            ratingCount   = 1432,
+            genres        = listOf("Thriller", "Science Fiction", "Drama"),
+            description   = "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives.",
+            seasonCount   = 2,
+            episodeCount  = 19,
+            reviewCount   = 31
+        ),
+        Media(
+            id            = 4,
+            mediaType     = "book",
+            title         = "Foundation",
+            author        = "Isaac Asimov",
+            publishedYear = 1951,
+            averageRating = 4.7f,
+            ratingCount   = 1623,
+            genres        = listOf("Science Fiction"),
+            description   = "The Foundation series chronicles the fall and rise of a galactic empire over thousands of years.",
+            pageCount     = 255,
+            reviewCount   = 28
+        ),
+        Media(
+            id             = 5,
+            mediaType      = "movie",
+            title          = "Interstellar",
+            director       = "Christopher Nolan",
+            publishedYear  = 2014,
+            averageRating  = 4.6f,
+            ratingCount    = 2341,
+            genres         = listOf("Science Fiction", "Adventure"),
+            description    = "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+            runtimeMinutes = 169,
+            reviewCount    = 35
+        ),
+        Media(
+            id            = 6,
+            mediaType     = "show",
+            title         = "Dark",
+            creator       = "Baran bo Odar",
+            network       = "Netflix",
+            publishedYear = 2017,
+            averageRating = 4.8f,
+            ratingCount   = 1563,
+            genres        = listOf("Science Fiction", "Thriller", "Mystery"),
+            description   = "A missing child sets four families on a frantic hunt for answers as they unearth a mind-bending mystery that spans three generations.",
+            seasonCount   = 3,
+            episodeCount  = 26,
+            reviewCount   = 22
+        )
     )
 
-    val mediaList = listOf(
-        Media(id = 1,  mediaType = "book",  title = "The Hitchhiker's Guide to the Galaxy",
-            author = "Douglas Adams", publishedYear = 1979,
-            averageRating = 4.7f, ratingCount = 312,
-            genres = listOf("Science Fiction", "Comedy")),
-        Media(id = 2,  mediaType = "book",  title = "Project Hail Mary",
-            author = "Andy Weir", publishedYear = 2021,
-            averageRating = 4.9f, ratingCount = 478,
-            genres = listOf("Science Fiction", "Adventure")),
-        Media(id = 3,  mediaType = "book",  title = "The Name of the Wind",
-            author = "Patrick Rothfuss", publishedYear = 2007,
-            averageRating = 4.6f, ratingCount = 291,
-            genres = listOf("Fantasy", "Adventure")),
-        Media(id = 4,  mediaType = "book",  title = "Dune",
-            author = "Frank Herbert", publishedYear = 1965,
-            averageRating = 4.8f, ratingCount = 521,
-            genres = listOf("Science Fiction", "Epic")),
-        Media(id = 5,  mediaType = "movie", title = "Arrival",
-            director = "Denis Villeneuve", publishedYear = 2016,
-            averageRating = 4.5f, ratingCount = 263,
-            genres = listOf("Science Fiction", "Drama")),
-        Media(id = 6,  mediaType = "movie", title = "Everything Everywhere All at Once",
-            director = "Daniel Kwan, Daniel Scheinert", publishedYear = 2022,
-            averageRating = 4.8f, ratingCount = 389,
-            genres = listOf("Science Fiction", "Comedy", "Drama")),
-        Media(id = 7,  mediaType = "movie", title = "Interstellar",
-            director = "Christopher Nolan", publishedYear = 2014,
-            averageRating = 4.6f, ratingCount = 441,
-            genres = listOf("Science Fiction", "Adventure")),
-        Media(id = 8,  mediaType = "show",  title = "Severance",
-            creator = "Dan Erickson", network = "Apple TV+", publishedYear = 2022,
-            averageRating = 4.9f, ratingCount = 317,
-            genres = listOf("Thriller", "Science Fiction", "Drama")),
-        Media(id = 9,  mediaType = "show",  title = "The Bear",
-            creator = "Christopher Storer", network = "FX on Hulu", publishedYear = 2022,
-            averageRating = 4.8f, ratingCount = 298,
-            genres = listOf("Drama", "Comedy")),
-        Media(id = 10, mediaType = "show",  title = "Andor",
-            creator = "Tony Gilroy", network = "Disney+", publishedYear = 2022,
-            averageRating = 4.7f, ratingCount = 276,
-            genres = listOf("Science Fiction", "Drama", "Action")),
+    fun getMediaById(id: Int): Media? = mediaList.find { it.id == id }
+
+    var currentUser = UserProfile(
+        id          = "user-001",
+        email       = "ilyas.ibrahim@my.metrostate.edu",
+        username    = "ics342-ilyas-ibrahim",
+        displayName = "Ilyas Ibrahim"
     )
 
-    val libraryItems = listOf(
-        LibraryItem("user-001", 1, LibraryStatus.FINISHED,
-            "2024-01-10T10:00:00Z", "2024-01-15T10:00:00Z", mediaList[0]),
-        LibraryItem("user-001", 5, LibraryStatus.IN_PROGRESS,
-            "2024-01-18T10:00:00Z", "2024-01-18T10:00:00Z", mediaList[4]),
-        LibraryItem("user-001", 8, LibraryStatus.WANT_TO,
-            "2024-01-20T10:00:00Z", "2024-01-20T10:00:00Z", mediaList[7]),
+    val followers: List<UserProfile> = listOf(
+        UserProfile(
+            id          = "user-002",
+            email       = "nicholas@example.com",
+            username    = "nicholas_c",
+            displayName = "Nicholas Chyrklund"
+        ),
+        UserProfile(
+            id          = "user-003",
+            email       = "ahmed@example.com",
+            username    = "ahmed_s",
+            displayName = "Ahmed Sadiq"
+        )
     )
 
-    private val userJordan = UserProfile("user-002", "j@example.com", "jsmith",   "Jordan Smith",  followerCount = 5,  followingCount = 10)
-    private val userPriya  = UserProfile("user-003", "p@example.com", "priya_r", "Priya Patel",   followerCount = 23, followingCount = 15)
-    private val userMarco  = UserProfile("user-004", "m@example.com", "mramos",  "Marco Ramos",   followerCount = 8,  followingCount = 4)
-    private val userSarah  = UserProfile("user-005", "s@example.com", "sarahk",  "Sarah Kim",     followerCount = 31, followingCount = 22)
-
-    val activityFeed = listOf(
-        ActivityEvent(1, "user-002", "finished", 5, createdAt = "2024-01-22T14:30:00Z",
-            user = userJordan, media = mediaList[4]),
-        ActivityEvent(2, "user-003", "review",   8, rating = 5,
-            reviewText = "Absolutely gripping from start to finish.",
-            createdAt = "2024-01-22T11:15:00Z", user = userPriya, media = mediaList[7]),
-        ActivityEvent(3, "user-004", "added",    10, createdAt = "2024-01-21T20:00:00Z",
-            user = userMarco, media = mediaList[9]),
-        ActivityEvent(4, "user-002", "started",  9, createdAt = "2024-01-21T18:45:00Z",
-            user = userJordan, media = mediaList[8]),
-        ActivityEvent(5, "user-003", "review",   1, rating = 4,
-            createdAt = "2024-01-20T09:00:00Z", user = userPriya, media = mediaList[0]),
+    val following: List<UserProfile> = listOf(
+        UserProfile(
+            id          = "user-002",
+            email       = "nicholas@example.com",
+            username    = "nicholas_c",
+            displayName = "Nicholas Chyrklund"
+        )
     )
 
-    val followers = listOf(userJordan, userPriya)
-    val following = listOf(userMarco, userSarah)
+    val libraryItems: List<LibraryItem> = listOf(
+        LibraryItem(
+            mediaId   = 1,
+            userId    = "user-001",
+            media     = mediaList[0],
+            status    = LibraryStatus.WANT_TO,
+            addedAt   = "2024-01-01",
+            updatedAt = "2024-01-01"
+        ),
+        LibraryItem(
+            mediaId   = 2,
+            userId    = "user-001",
+            media     = mediaList[1],
+            status    = LibraryStatus.IN_PROGRESS,
+            addedAt   = "2024-01-05",
+            updatedAt = "2024-01-05"
+        ),
+        LibraryItem(
+            mediaId   = 3,
+            userId    = "user-001",
+            media     = mediaList[2],
+            status    = LibraryStatus.FINISHED,
+            addedAt   = "2024-01-10",
+            updatedAt = "2024-01-10"
+        )
+    )
+
+    val activityFeed: List<ActivityEvent> = listOf(
+        ActivityEvent(
+            id           = 1,
+            userId       = "user-002",
+            activityType = "finished",
+            mediaId      = 1,
+            createdAt    = "2024-01-22",
+            user         = followers[0],
+            media        = mediaList[0]
+        ),
+        ActivityEvent(
+            id           = 2,
+            userId       = "user-003",
+            activityType = "started",
+            mediaId      = 2,
+            createdAt    = "2024-01-21",
+            user         = followers[1],
+            media        = mediaList[1]
+        ),
+        ActivityEvent(
+            id           = 3,
+            userId       = "user-002",
+            activityType = "review",
+            mediaId      = 3,
+            rating       = 5,
+            reviewText   = "One of the best shows I have ever seen.",
+            createdAt    = "2024-01-20",
+            user         = followers[0],
+            media        = mediaList[2]
+        ),
+        ActivityEvent(
+            id           = 4,
+            userId       = "user-003",
+            activityType = "added",
+            mediaId      = 4,
+            createdAt    = "2024-01-19",
+            user         = followers[1],
+            media        = mediaList[3]
+        ),
+        ActivityEvent(
+            id           = 5,
+            userId       = "user-002",
+            activityType = "finished",
+            mediaId      = 5,
+            createdAt    = "2024-01-18",
+            user         = followers[0],
+            media        = mediaList[4]
+        )
+    )
 }

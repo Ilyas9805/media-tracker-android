@@ -1,10 +1,12 @@
 package edu.metrostate.ics342.mediatracker.data.network
 
-import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
 import edu.metrostate.ics342.mediatracker.data.MediaDetailResult
 import edu.metrostate.ics342.mediatracker.data.MediaRepository
 import edu.metrostate.ics342.mediatracker.data.MediaSearchResult
+import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
 import edu.metrostate.ics342.mediatracker.data.SessionRepository
+import edu.metrostate.ics342.mediatracker.data.model.FavoriteEntry
+import edu.metrostate.ics342.mediatracker.data.model.LibraryEntry
 import edu.metrostate.ics342.mediatracker.data.model.Media
 import java.io.IOException
 
@@ -19,6 +21,8 @@ class DefaultMediaRepository(
 ) : MediaRepository {
 
     private val api = RetrofitInstance.mediaApiService(sessionRepository)
+
+    // ── Search ────────────────────────────────────────────────────────────
 
     suspend fun search(query: String, type: String?, after: String?): MediaPage {
         val response = api.searchMedia(
@@ -55,6 +59,8 @@ class DefaultMediaRepository(
         }
     }
 
+    // ── Media Detail ──────────────────────────────────────────────────────
+
     override suspend fun getMediaDetail(id: Int): MediaDetailResult {
         return try {
             val response = api.getMediaById(id)
@@ -73,6 +79,79 @@ class DefaultMediaRepository(
             }
         } catch (e: IOException) {
             MediaDetailResult.NetworkError
+        }
+    }
+
+    // ── Library ───────────────────────────────────────────────────────────
+
+    suspend fun getLibrary(status: String? = null): List<LibraryEntry> {
+        return try {
+            val response = api.getLibrary(status = status)
+            if (response.isSuccessful) response.body() ?: emptyList()
+            else emptyList()
+        } catch (e: IOException) {
+            emptyList()
+        }
+    }
+
+    suspend fun getLibraryEntry(mediaId: Int): LibraryEntry? {
+        return try {
+            val response = api.getLibraryEntry(mediaId)
+            if (response.isSuccessful) response.body()
+            else null
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    suspend fun addToLibrary(mediaId: Int, status: String): LibraryEntry? {
+        return try {
+            val response = api.addToLibrary(AddLibraryRequest(mediaId, status))
+            if (response.isSuccessful) response.body()
+            else null
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    suspend fun updateLibraryEntry(mediaId: Int, status: String): LibraryEntry? {
+        return try {
+            val response = api.updateLibraryEntry(mediaId, UpdateLibraryRequest(status))
+            if (response.isSuccessful) response.body()
+            else null
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    // ── Favorites ─────────────────────────────────────────────────────────
+
+    suspend fun getFavoriteEntry(mediaId: Int): FavoriteEntry? {
+        return try {
+            val response = api.getFavoriteEntry(mediaId)
+            if (response.isSuccessful) response.body()
+            else null
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    suspend fun addToFavorites(mediaId: Int): FavoriteEntry? {
+        return try {
+            val response = api.addToFavorites(AddFavoriteRequest(mediaId))
+            if (response.isSuccessful) response.body()
+            else null
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    suspend fun removeFromLibrary(mediaId: Int): Boolean {
+        return try {
+            val response = api.removeFromLibrary(mediaId)
+            response.isSuccessful
+        } catch (e: IOException) {
+            false
         }
     }
 }

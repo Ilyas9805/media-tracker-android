@@ -1,5 +1,6 @@
 package edu.metrostate.ics342.mediatracker.data.network
 
+import edu.metrostate.ics342.mediatracker.data.model.Priority
 import edu.metrostate.ics342.mediatracker.data.MediaDetailResult
 import edu.metrostate.ics342.mediatracker.data.MediaRepository
 import edu.metrostate.ics342.mediatracker.data.MediaSearchResult
@@ -152,6 +153,26 @@ class DefaultMediaRepository(
             response.isSuccessful
         } catch (e: IOException) {
             false
+        }
+    }
+
+    suspend fun getPriorities(): List<Priority> {
+        return try {
+            val response = api.getPriorities()
+            if (response.isSuccessful) response.body() ?: emptyList()
+            else emptyList()
+        } catch (e: IOException) {
+            emptyList()
+        }
+    }
+
+    suspend fun setPriorities(priorities: List<PriorityRequest>): List<Priority> {
+        return try {
+            val response = api.setPriorities(SetPrioritiesRequest(priorities))
+            if (response.isSuccessful) response.body() ?: emptyList()
+            else emptyList()
+        } catch (e: IOException) {
+            emptyList()
         }
     }
 }

@@ -7,13 +7,15 @@ import edu.metrostate.ics342.mediatracker.data.datastore.DefaultSessionRepositor
 import edu.metrostate.ics342.mediatracker.data.model.LibraryEntry
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.network.DefaultMediaRepository
+import edu.metrostate.ics342.mediatracker.data.network.PriorityRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-//API
+
+
 class LibraryViewModel(application: Application) : AndroidViewModel(application) {
 
     private val mediaRepository = DefaultMediaRepository(
@@ -68,6 +70,29 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
                     if (entry.mediaId == mediaId) entry.copy(status = newStatus) else entry
                 }
             }
+        }
+    }
+
+    fun addToPriorities(
+        mediaId            : Int,
+        priority           : Int,
+        estimatedTimeHours : Float,
+        notes              : String?
+    ) {
+        viewModelScope.launch {
+            val current    = mediaRepository.getPriorities()
+            val existing   = current.indexOfFirst { it.mediaId == mediaId }
+            val orderIndex = if (existing >= 0) current[existing].orderIndex else current.size
+
+            val request = PriorityRequest(
+                mediaId            = mediaId,
+                priority           = priority,
+                orderIndex         = orderIndex,
+                estimatedTimeHours = estimatedTimeHours,
+                notes              = notes
+            )
+
+            mediaRepository.setPriority(request)
         }
     }
 }

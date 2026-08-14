@@ -1,6 +1,5 @@
 package edu.metrostate.ics342.mediatracker.ui.priorities
 
-
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,7 +28,6 @@ class PrioritiesViewModel(application: Application) : AndroidViewModel(applicati
         loadPriorities()
     }
 
-    //API
     fun loadPriorities() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -41,7 +39,6 @@ class PrioritiesViewModel(application: Application) : AndroidViewModel(applicati
 
     fun addPriority(mediaId: Int, priority: Int, estimatedTimeHours: Float, notes: String?) {
         viewModelScope.launch {
-            // Build new list — update existing or add new
             val current    = _priorities.value.toMutableList()
             val existing   = current.indexOfFirst { it.mediaId == mediaId }
             val orderIndex = if (existing >= 0) current[existing].orderIndex
@@ -55,45 +52,17 @@ class PrioritiesViewModel(application: Application) : AndroidViewModel(applicati
                 notes              = notes
             )
 
-            val updatedRequests = current.map {
-                PriorityRequest(
-                    mediaId            = it.mediaId,
-                    priority           = it.priority,
-                    orderIndex         = it.orderIndex,
-                    estimatedTimeHours = it.estimatedTimeHours,
-                    notes              = it.notes
-                )
-            }.toMutableList()
-
-            if (existing >= 0) updatedRequests[existing] = request
-            else updatedRequests.add(request)
-
-            val result = mediaRepository.setPriorities(updatedRequests)
-            if (result.isNotEmpty()) {
-                _priorities.value = result.sortedBy { it.orderIndex }
+            val result = mediaRepository.setPriority(request)
+            if (result != null) {
+                // Reload full list from server after adding
+                _priorities.value = mediaRepository.getPriorities()
+                    .sortedBy { it.orderIndex }
             }
         }
     }
 
     fun removePriority(mediaId: Int) {
-        viewModelScope.launch {
-            val updatedRequests = _priorities.value
-                .filter { it.mediaId != mediaId }
-                .map {
-                    PriorityRequest(
-                        mediaId            = it.mediaId,
-                        priority           = it.priority,
-                        orderIndex         = it.orderIndex,
-                        estimatedTimeHours = it.estimatedTimeHours,
-                        notes              = it.notes
-                    )
-                }
-            val result = mediaRepository.setPriorities(updatedRequests)
-            if (result.isNotEmpty()) {
-                _priorities.value = result.sortedBy { it.orderIndex }
-            } else if (updatedRequests.isEmpty()) {
-                _priorities.value = emptyList()
-            }
-        }
+        // No DELETE endpoint exists — remove from local state only
+        _priorities.value = _priorities.value.filter { it.mediaId != mediaId }
     }
 }
